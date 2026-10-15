@@ -1,6 +1,26 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
+const AUTH_PAGES = [
+  '/admin/login',
+  '/account/login',
+  '/account/signup',
+  '/supplier/login',
+  '/supplier/signup',
+]
+
+function panelFor(role: string | null | undefined) {
+  if (role === 'admin') return '/admin'
+  if (role === 'supplier') return '/supplier'
+  return '/account'
+}
+
+function loginFor(pathname: string) {
+  if (pathname.startsWith('/admin')) return '/admin/login'
+  if (pathname.startsWith('/supplier')) return '/supplier/login'
+  return '/account/login'
+}
+
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request })
 
@@ -23,33 +43,39 @@ export async function updateSession(request: NextRequest) {
     }
   )
 
+  const redirectTo = (path: string) => {
+    const url = request.nextUrl.clone()
+    url.pathname = path
+    return NextResponse.redirect(url)
+  }
+
   const { data: { user } } = await supabase.auth.getUser()
   const pathname = request.nextUrl.pathname
 
-  const isAdminRoute = pathname.startsWith('/admin')
-  const isAdminLoginPage = pathname === '/admin/login'
-  const isAccountRoute = pathname.startsWith('/account')
-  const isAccountAuthPage = pathname === '/account/login' || pathname === '/account/signup'
+  const isGuarded =
+    pathname.startsWith('/admin') ||
+    pathname.startsWith('/account') ||
+    pathname.startsWith('/supplier')
 
-  if (isAdminRoute && !isAdminLoginPage) {
-    if (!user) {
-      const url = request.nextUrl.clone()
-      url.pathname = '/admin/login'
-      return NextResponse.redirect(url)
-    }
-    const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
-    if (profile?.role !== 'admin') {
-      const url = request.nextUrl.clone()
-      url.pathname = '/admin/login'
-      return NextResponse.redirect(url)
-    }
+  if (!isGuarded) return supabaseResponse
+
+  const isAuthPage = AUTH_PAGES.includes(pathname)
+
+  if (!user) {
+    if (isAuthPage) return supabaseResponse
+    return redirectTo(loginFor(pathname))
   }
 
-  if (isAccountRoute && !isAccountAuthPage && !user) {
-    const url = request.nextUrl.clone()
-    url.pathname = '/account/login'
-    return NextResponse.redirect(url)
-  }
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', user.id)
+    .single()
+
+  const myPanel = panelFor(profile?.role)
+
+  if (isAuthPage) return redirectTo(myPanel)
+  if (!pathname.startsWith(myPanel)) return redirectTo(myPanel)
 
   return supabaseResponse
 }

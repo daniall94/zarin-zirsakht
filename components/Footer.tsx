@@ -17,7 +17,7 @@ export function Footer() {
             <li><Link href="/" className="hover:text-amber-dark">صفحه اصلی</Link></li>
             <li><Link href="/about" className="hover:text-amber-dark">درباره ما</Link></li>
             <li><Link href="/contact" className="hover:text-amber-dark">تماس با ما</Link></li>
-            <li><Link href="/inquiry" className="hover:text-amber-dark">لیست استعلام</Link></li>
+           <li><Link href="/supplier/login" className="hover:text-amber-dark">ورود تأمین‌کنندگان</Link></li>
           </ul>
         </div>
 

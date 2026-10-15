@@ -46,6 +46,11 @@ export default function BuyerLoginPage() {
           <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} dir="ltr"
             className="mt-1 w-full border border-steel-light/50 bg-white px-3 py-2 text-sm outline-none focus:border-amber" required />
         </div>
+        <div className="text-left">
+  <Link href="/forgot-password" className="text-xs text-steel hover:text-amber-dark">
+    رمز عبورت رو فراموش کردی؟
+  </Link>
+</div>
 
         {error && <p className="text-sm text-red-600">{error}</p>}
 

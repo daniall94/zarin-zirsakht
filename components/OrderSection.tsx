@@ -21,7 +21,7 @@ export function OrderSection({ userId, isApproved }: Props) {
   const [error, setError] = useState<string | null>(null)
   const [isSuccess, setIsSuccess] = useState(false)
 
-  const handleSubmit = async (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError(null)
 
@@ -36,12 +36,11 @@ export function OrderSection({ userId, isApproved }: Props) {
 
     setIsSubmitting(true)
     const supabase = createClient()
-    const inquiryId = crypto.randomUUID()
 
     let orderFilePath: string | null = null
     if (orderFile) {
       const fileExt = orderFile.name.split('.').pop()
-      const path = `${userId}/${inquiryId}.${fileExt}`
+      const path = `${userId}/${crypto.randomUUID()}.${fileExt}`
       const { error: uploadError } = await supabase.storage.from('order-files').upload(path, orderFile)
       if (uploadError) {
         setError('آپلود فایل با مشکل مواجه شد: ' + uploadError.message)
@@ -51,29 +50,19 @@ export function OrderSection({ userId, isApproved }: Props) {
       orderFilePath = path
     }
 
-    const { error: inquiryError } = await supabase.from('inquiries').insert({
-      id: inquiryId,
-      buyer_id: userId,
-      customer_name: customerName.trim(),
-      phone: phone.trim(),
-      email: email.trim() || null,
-      message: message.trim() || null,
-      order_file_path: orderFilePath,
+    const { error: orderError } = await supabase.rpc('place_order', {
+      p_customer_name: customerName.trim(),
+      p_phone: phone.trim(),
+      p_email: email.trim(),
+      p_message: message.trim(),
+      p_file_path: orderFilePath,
+      p_items: items.map((item) => ({ product_id: item.id, quantity: 1 })),
     })
 
-    if (inquiryError) {
-      setError('مشکلی پیش اومد: ' + inquiryError.message)
+    if (orderError) {
+      setError('مشکلی پیش اومد: ' + orderError.message)
       setIsSubmitting(false)
       return
-    }
-
-    if (items.length > 0) {
-      const inquiryItems = items.map((item) => ({
-        inquiry_id: inquiryId,
-        product_id: item.id,
-        quantity: 1,
-      }))
-      await supabase.from('inquiry_items').insert(inquiryItems)
     }
 
     clearItems()

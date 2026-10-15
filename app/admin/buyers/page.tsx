@@ -13,7 +13,8 @@ export default async function AdminBuyersPage() {
     .from('profiles')
     .select('id, full_name, email, company_name, approved_for_subscription')
     .eq('role', 'buyer')
-    .order('created_at', { ascending: false })
+    .order('approved_for_subscription', { ascending: true })
+.order('created_at', { ascending: false })
 
   return (
     <main className="min-h-screen px-6 py-12 md:px-12">

@@ -1,3 +1,4 @@
+import PendingCount from '@/components/PendingCount'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
@@ -25,8 +26,11 @@ export default async function AdminPage() {
     <Link href="/admin/inquiries" className="text-sm text-steel hover:text-graphite">
   درخواست‌های استعلام
 </Link>
-<Link href="/admin/buyers" className="text-sm text-steel hover:text-graphite">
-  خریداران
+<Link href="/admin/buyers" className="flex items-center gap-1.5 text-sm text-steel hover:text-graphite">
+  خریداران <PendingCount role="buyer" />
+</Link>
+<Link href="/admin/suppliers" className="flex items-center gap-1.5 text-sm text-steel hover:text-graphite">
+  تأمین‌کنندگان <PendingCount role="supplier" />
 </Link>
     <LogoutButton />
   </div>
