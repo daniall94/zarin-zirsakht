@@ -15,6 +15,15 @@ type Product = {
   category_id: string | null
   image_url: string | null
 }
+type ProductPayload = {
+  name: string
+  slug: string
+  description: string | null
+  sku: string | null
+  category_id: string | null
+  image_url: string | null
+  supplier_id?: string
+}
 
 type Props = {
   categories: Category[]
@@ -78,7 +87,7 @@ const fileName = `${user.id}/${crypto.randomUUID()}.${fileExt}`
     setIsSubmitting(true)
     const supabase = createClient()
 
-    const payload = {
+        const payload: ProductPayload = {
       name: name.trim(),
       slug: slug.trim(),
       description: description.trim() || null,
@@ -87,16 +96,16 @@ const fileName = `${user.id}/${crypto.randomUUID()}.${fileExt}`
       image_url: imageUrl.trim() || null,
     }
 
-    const { error: dbError } = isEditing
-      ? await supabase.from('products').update(payload).eq('id', product!.id)
-      : await supabase
-          .from('products')
-          .insert(supplierId ? { ...payload, supplier_id: supplierId } : payload)
-
-    if (dbError) {
-      setError('مشکلی پیش اومد: ' + dbError.message)
-      setIsSubmitting(false)
-      return
+    let dbError
+    if (isEditing) {
+      const result = await supabase.from('products').update(payload).eq('id', product!.id)
+      dbError = result.error
+    } else {
+      const insertPayload: ProductPayload = supplierId
+        ? { ...payload, supplier_id: supplierId }
+        : payload
+      const result = await supabase.from('products').insert(insertPayload)
+      dbError = result.error
     }
 
     router.push(redirectTo)
