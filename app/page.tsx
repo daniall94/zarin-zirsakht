@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import { ParallaxHero } from '@/components/ParallaxHero'
+import { redirectIfSupplier } from '@/lib/redirect-if-supplier'
 
 type CategoryWithCount = {
   id: string
@@ -23,6 +24,7 @@ function NeonDivider() {
 }
 
 export default async function Home() {
+  await redirectIfSupplier()
   const supabase = await createClient()
 
   const { data: rawCategories } = await supabase

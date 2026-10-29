@@ -2,6 +2,7 @@ import { AddToInquiryButton } from '@/components/AddToInquiryButton'
 import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
+import { redirectIfSupplier } from '@/lib/redirect-if-supplier'
 
 type Product = {
   id: string
@@ -14,10 +15,12 @@ type Product = {
 }
 
 export default async function ProductPage({
+  
   params,
 }: {
   params: Promise<{ slug: string }>
 }) {
+   await redirectIfSupplier()
   const { slug } = await params
   const supabase = await createClient()
 

@@ -2,13 +2,17 @@ import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { ProductGrid } from '@/components/ProductGrid'
+import { redirectIfSupplier } from '@/lib/redirect-if-supplier'
 
 export default async function CategoryPage({
   params,
 }: {
   params: Promise<{ slug: string }>
 }) {
+   await redirectIfSupplier()
   const { slug } = await params
+  
+  
   const supabase = await createClient()
 
   const { data: category } = await supabase
